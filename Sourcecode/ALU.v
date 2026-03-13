@@ -24,7 +24,7 @@ module ALU(
     //In/Outs of ALU for 16 bit Bus DataRead/ALUResult
     input [15:0] ReadData1,
     input [15:0] ReadData2,
-    input [3:0] ALUControl
+    input [3:0] ALUControl,
     output reg zero,
     output reg [15:0] ALUResult
     
