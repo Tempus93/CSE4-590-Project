@@ -24,16 +24,70 @@ module ALU(
     //In/Outs of ALU for 16 bit Bus DataRead/ALUResult
     input [15:0] ReadData1,
     input [15:0] ReadData2,
-    output Zero,
-    output [15:0] ALUResult,
     input [3:0] ALUControl
+    output reg zero,
+    output reg [15:0] ALUResult
+    
     ); 
     reg [3:0] temp;
-    parameter  =(
-        ADD = 4'b0000
-        ADD = 4'b0000
-        ADD = 4'b0000
-        ADD = 4'b0000
 
-    );
+    parameter 
+    //Required Instructions
+    OP_ADD = 3'b000, //merged ADD and ADDI since they share the same logic
+    SUB = 3'b001,
+    SLL = 3'b010, 
+    AND = 3'b011,
+    LW = 4'b0001, 
+    SW = 4'b0010,
+    BEQ = 4'b0100,
+    BNE = 4'b0101,
+    jmp = 4'b0110;
+
+    always @(*) begin //Unit Initalization
+        zero = 0; 
+        temp = 0;
+        ALUResult = 0;
+        begin
+            case (ALUControl)
+
+            OP_ADD: begin
+                
+            end
+
+            SUB: begin
+                
+            end
+
+            SLL: begin
+                
+            end
+
+            AND: begin
+                
+            end
+
+            LW: begin
+                
+            end
+
+            SW: begin
+                
+            end
+
+            BEQ: begin
+                
+            end
+
+            BNE: begin
+                
+            end
+
+            jmp: begin
+                
+            end
+
+            endcase
+        end
+    end
+
 endmodule
