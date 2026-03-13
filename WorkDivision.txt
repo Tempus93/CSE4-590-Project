@@ -1,0 +1,3 @@
+Justin Downer - ALU. Sign Extension, Instruction Memory
+Sajjad Ali - Program Counter, Control Unit
+Vishal Kishore Kumar - Data Memory, Register File, Multiplexer
