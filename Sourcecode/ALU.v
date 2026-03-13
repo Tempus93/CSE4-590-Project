@@ -51,19 +51,38 @@ module ALU(
             case (ALUControl)
 
             OP_ADD: begin
+                temp = ReadData1 + ReadData2;
+                ALUResult = temp;
+                if (temp == 0) begin
+                    zero = 1;
+                end
                 
             end
 
             SUB: begin
+                temp = ReadData1 - ReadData2;
+                ALUResult = temp;
+                if (temp == 0) begin
+                    zero = 1;
+                end
                 
             end
 
-            SLL: begin
+            SLL: begin 
+                temp = ReadData1 << ReadData2;
+                ALUResult = temp;
+                if (temp == 0) begin
+                    zero = 1;
+                end 
                 
             end
 
             AND: begin
-                
+                temp = ReadData1 & ReadData2;
+                ALUResult = temp;
+                if (temp == 0) begin
+                    zero = 1;
+                end 
             end
 
             LW: begin
