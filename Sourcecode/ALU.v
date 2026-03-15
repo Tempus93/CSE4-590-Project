@@ -27,24 +27,24 @@ module ALU(
     input [3:0] ALUControl,
     output reg zero,
     output reg [15:0] ALUResult
-    
-    ); 
+
+    );
     reg [3:0] temp;
 
-    parameter 
+    parameter
     //Required Instructions
-    OP_ADD = 3'b000, //merged ADD and ADDI since they share the same logic
+    ADD = 3'b000, //merged ADD and ADDI since they share the same logic
     SUB = 3'b001,
-    SLL = 3'b010, 
+    SLL = 3'b010,
     AND = 3'b011,
-    LW = 4'b0001, 
+    LW = 4'b0001,
     SW = 4'b0010,
     BEQ = 4'b0100,
     BNE = 4'b0101,
-    jmp = 4'b0110;
+    JMP = 4'b0110;
 
-    always @(*) begin //Unit Initalization
-        zero = 0; 
+    always_comb begin //Unit Initalization
+        zero = 0;
         temp = 0;
         ALUResult = 0;
         begin
@@ -56,7 +56,7 @@ module ALU(
                 if (temp == 0) begin
                     zero = 1;
                 end
-                
+
             end
 
             SUB: begin
@@ -65,7 +65,7 @@ module ALU(
                 if (temp == 0) begin
                     zero = 1;
                 end
-                
+
             end
 
             SLL: begin 
@@ -86,10 +86,22 @@ module ALU(
             end
 
             LW: begin
+                temp = ReadData1 + ReadData2; //Calculate Address for LW
+                //ReadData2 is the offset, ReadData1 is the base address
+                ALUResult = temp;
+                if (temp == 0) begin
+                    zero = 1;
+                end
                 
             end
 
             SW: begin
+                temp = ReadData1 + ReadData2; //Calculate Address for SW
+                //ReadData2 is the offset, ReadData1 is the base address
+                ALUResult = temp;
+                if (temp == 0) begin
+                    zero = 1;
+                end
                 
             end
 
