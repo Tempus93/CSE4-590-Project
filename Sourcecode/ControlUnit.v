@@ -31,5 +31,34 @@ module ControlUnit (
     output reg Jump,
     output reg [1:0] ALUOp
 );
-    
+
+always_comb begin
+        // Default values to avoid latches
+        RegWrite = 0;
+        ALUSrc = 0;
+        MemtoReg = 0;
+        MemWrite = 0;
+        MemRead = 0;
+        Branch = 0;
+        ALUOp = 2'b00;
+
+        case(Opcode)
+            4'b0000: begin // R-type (add, sub, and, sll)
+                RegWrite = 1; ALUSrc = 0; MemtoReg = 0; ALUOp = 2'b10;
+            end
+            4'b0001: begin // LW
+                RegWrite = 1; ALUSrc = 1; MemtoReg = 1; MemRead = 1; ALUOp = 2'b00;
+            end
+            4'b0010: begin // SW
+                RegWrite = 0; ALUSrc = 1; MemWrite = 1; ALUOp = 2'b00;
+            end
+            4'b0011: begin // ADDI
+                RegWrite = 1; ALUSrc = 1; MemtoReg = 0; ALUOp = 2'b00;
+            end
+            4'b0100: begin // BEQ
+                RegWrite = 0; ALUSrc = 0; Branch = 1; ALUOp = 2'b01;
+            end
+            default: ; // All signals remain 0
+        endcase
+    end
 endmodule
