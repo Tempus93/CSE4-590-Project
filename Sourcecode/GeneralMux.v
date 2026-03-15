@@ -2,7 +2,7 @@
 // Engineer: Vishal Kishore Kumar
 // Module: 2-to-1 Multiplexer
 
-module Mux2to1(
+module Multiplexer(
     input [15:0] input0,
     input [15:0] input1,
     input select,
