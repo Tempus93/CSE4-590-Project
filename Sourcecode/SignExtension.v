@@ -26,6 +26,6 @@ module sign_ext(
     );
     
     assign result[3:0] = imm_value;
-    assign result[15:4] = {12{in[3]}};
+    assign result[15:4] = {12{imm_value[3]}};
     
 endmodule
