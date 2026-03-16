@@ -11,7 +11,7 @@ module DataMemory(
     input mem_read,
     output reg [15:0] read_data
 );
-    reg [7:0] memory [0:63];
+    reg [7:0] memory [63:0];
 
     always @(*) begin
         if (mem_read)

@@ -32,7 +32,7 @@ module ControlUnit (
     output reg [1:0] ALUOp
 );
 
-always_comb begin
+always@(*) begin
         // Default values to avoid latches
         RegWrite = 0;
         ALUSrc = 0;
@@ -41,8 +41,8 @@ always_comb begin
         MemRead = 0;
         Branch = 0;
         ALUOp = 2'b00;
-
-        case(Opcode)
+        
+case(Instruction)
             4'b0000: begin // R-type (add, sub, and, sll)
                 RegWrite = 1; ALUSrc = 0; MemtoReg = 0; ALUOp = 2'b10;
             end
