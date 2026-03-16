@@ -5,7 +5,7 @@
 // 
 // Create Date: 03/15/2026 06:59:25 PM
 // Design Name: 
-// Module Name: sign_ext
+// Module Name: SignExt
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module sign_ext(
+module SignExt(
     input [3:0] imm_value,
     output [15:0] result
     );
