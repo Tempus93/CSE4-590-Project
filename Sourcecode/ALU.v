@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
+// Company:     
 // Engineer: Justin Downer
 // 
 // Create Date: 03/13/2026 04:10:32 PM
@@ -43,14 +43,14 @@ module ALU(
     BNE = 4'b0101,
     JMP = 4'b0110;
 
-    always_comb begin //Unit Initalization
+    always@(*) begin //Unit Initalization
         zero = 0;
         temp = 0;
         ALUResult = 0;
         begin
             case (ALUControl)
 
-            OP_ADD: begin
+            ADD: begin
                 temp = ReadData1 + ReadData2;
                 ALUResult = temp;
                 if (temp == 0) begin
@@ -106,15 +106,23 @@ module ALU(
             end
 
             BEQ: begin
+            temp = ReadData1 - ReadData2;
+            if (temp == 0) begin
+                    zero = 1;
+                end
                 
             end
 
             BNE: begin
-                
+            temp = ReadData1 - ReadData2;
+            if (temp != 0) begin
+                    zero = 1;
+                end
+           
             end
 
-            jmp: begin
-                
+            JMP: begin
+                //doesn't touch the ALU
             end
 
             endcase

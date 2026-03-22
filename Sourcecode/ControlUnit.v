@@ -40,6 +40,7 @@ always@(*) begin
         MemWrite = 0;
         MemRead = 0;
         Branch = 0;
+        Jump = 0;
         ALUOp = 2'b00;
         
 case(Instruction)
@@ -57,6 +58,12 @@ case(Instruction)
             end
             4'b0100: begin // BEQ
                 RegWrite = 0; ALUSrc = 0; Branch = 1; ALUOp = 2'b01;
+            end
+            4'b0101: begin // BNE
+                RegWrite = 0; ALUSrc = 0; Branch = 1; ALUOp = 2'b01;
+            end
+            4'b0110: begin // J
+                RegWrite = 0; ALUSrc = 0; Jump = 1; ALUOp = 2'b11;
             end
             default: ; // All signals remain 0
         endcase
