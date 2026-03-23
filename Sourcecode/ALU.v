@@ -29,7 +29,7 @@ module ALU(
     output reg [15:0] ALUResult
 
     );
-    reg [3:0] temp;
+    reg [15:0] temp;
 
     parameter
     //Required Instructions
@@ -49,82 +49,12 @@ module ALU(
         ALUResult = 0;
         begin
             case (ALUControl)
-
-            ADD: begin
-                temp = ReadData1 + ReadData2;
-                ALUResult = temp;
-                if (temp == 0) begin
-                    zero = 1;
-                end
-
-            end
-
-            SUB: begin
-                temp = ReadData1 - ReadData2;
-                ALUResult = temp;
-                if (temp == 0) begin
-                    zero = 1;
-                end
-
-            end
-
-            SLL: begin 
-                temp = ReadData1 << ReadData2;
-                ALUResult = temp;
-                if (temp == 0) begin
-                    zero = 1;
-                end 
-                
-            end
-
-            AND: begin
-                temp = ReadData1 & ReadData2;
-                ALUResult = temp;
-                if (temp == 0) begin
-                    zero = 1;
-                end 
-            end
-
-            LW: begin
-                temp = ReadData1 + ReadData2; //Calculate Address for LW
-                //ReadData2 is the offset, ReadData1 is the base address
-                ALUResult = temp;
-                if (temp == 0) begin
-                    zero = 1;
-                end
-                
-            end
-
-            SW: begin
-                temp = ReadData1 + ReadData2; //Calculate Address for SW
-                //ReadData2 is the offset, ReadData1 is the base address
-                ALUResult = temp;
-                if (temp == 0) begin
-                    zero = 1;
-                end
-                
-            end
-
-            BEQ: begin
-            temp = ReadData1 - ReadData2;
-            if (temp == 0) begin
-                    zero = 1;
-                end
-                
-            end
-
-            BNE: begin
-            temp = ReadData1 - ReadData2;
-            if (temp != 0) begin
-                    zero = 1;
-                end
-           
-            end
-
-            JMP: begin
-                //doesn't touch the ALU
-            end
-
+                3'b000: temp = ReadData1 + ReadData2; // ADD (used by LW, SW, ADDI, ADD)
+                3'b001: temp = ReadData1 - ReadData2; // SUB (used by BEQ, BNE, SUB)
+                3'b010: temp = ReadData1 << ReadData2[3:0]; // SLL
+                3'b011: temp = ReadData1 & ReadData2; // AND
+                default: temp = 0;
+             
             endcase
         end
     end
