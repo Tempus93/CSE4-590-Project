@@ -28,6 +28,7 @@ module ControlUnit (
     output reg MemRead,
     output reg MemWrite,
     output reg Branch,
+    output reg BNE,
     output reg Jump,
     output reg [1:0] ALUOp
 );
@@ -41,6 +42,7 @@ always@(*) begin
         MemRead = 0;
         Branch = 0;
         Jump = 0;
+        BNE = 0;
         ALUOp = 2'b00;
         
 case(Instruction)
@@ -60,7 +62,7 @@ case(Instruction)
                 RegWrite = 0; ALUSrc = 0; Branch = 1; ALUOp = 2'b01;
             end
             4'b0101: begin // BNE
-                RegWrite = 0; ALUSrc = 0; Branch = 1; ALUOp = 2'b01;
+                RegWrite = 0; ALUSrc = 0; Branch = 1; BNE = 1; ALUOp = 2'b01;
             end
             4'b0110: begin // J
                 RegWrite = 0; ALUSrc = 0; Jump = 1; ALUOp = 2'b11;
