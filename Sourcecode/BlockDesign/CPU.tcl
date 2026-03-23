@@ -46,7 +46,7 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 
 # The design that will be created by this Tcl script contains the following 
 # module references:
-# ALU, ControlUnit, ALUControl, PCRegister, InstructMem, SignExt, RegisterFile, Multiplexer, Multiplexer, DataMemory, Multiplexer, PCAdder, ANDGate, Multiplexer, PCAdder, ShiftLeft2v2, Multiplexer
+# ALU, ControlUnit, ALUControl, PCRegister, InstructMem, SignExt, RegisterFile, Multiplexer, Multiplexer, DataMemory, Multiplexer, PCAdder, ANDGate, Multiplexer, PCAdder, ShiftLeft2v2, Multiplexer, XORGate
 
 # Please add the sources of those modules before sourcing this Tcl script.
 
@@ -131,6 +131,32 @@ if { $nRet != 0 } {
 
 set bCheckIPsPassed 1
 ##################################################################
+# CHECK IPs
+##################################################################
+set bCheckIPs 1
+if { $bCheckIPs == 1 } {
+   set list_check_ips "\ 
+xilinx.com:ip:xlslice:1.0\
+"
+
+   set list_ips_missing ""
+   common::send_gid_msg -ssname BD::TCL -id 2011 -severity "INFO" "Checking if the following IPs exist in the project's IP catalog: $list_check_ips ."
+
+   foreach ip_vlnv $list_check_ips {
+      set ip_obj [get_ipdefs -all $ip_vlnv]
+      if { $ip_obj eq "" } {
+         lappend list_ips_missing $ip_vlnv
+      }
+   }
+
+   if { $list_ips_missing ne "" } {
+      catch {common::send_gid_msg -ssname BD::TCL -id 2012 -severity "ERROR" "The following IPs are not found in the IP Catalog:\n  $list_ips_missing\n\nResolution: Please add the repository containing the IP(s) to the project." }
+      set bCheckIPsPassed 0
+   }
+
+}
+
+##################################################################
 # CHECK Modules
 ##################################################################
 set bCheckModules 1
@@ -153,6 +179,7 @@ Multiplexer\
 PCAdder\
 ShiftLeft2v2\
 Multiplexer\
+XORGate\
 "
 
    set list_mods_missing ""
@@ -405,14 +432,76 @@ proc create_root_design { parentCell } {
      return 1
    }
   
+  # Create instance: XORGate_0, and set properties
+  set block_name XORGate
+  set block_cell_name XORGate_0
+  if { [catch {set XORGate_0 [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   } elseif { $XORGate_0 eq "" } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   }
+  
+  # Create instance: CU, and set properties
+  set CU [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlslice:1.0 CU ]
+  set_property -dict [list \
+    CONFIG.DIN_FROM {15} \
+    CONFIG.DIN_TO {12} \
+    CONFIG.DIN_WIDTH {16} \
+  ] $CU
+
+
+  # Create instance: ReadReg2, and set properties
+  set ReadReg2 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlslice:1.0 ReadReg2 ]
+  set_property -dict [list \
+    CONFIG.DIN_FROM {11} \
+    CONFIG.DIN_TO {8} \
+    CONFIG.DIN_WIDTH {16} \
+  ] $ReadReg2
+
+
+  # Create instance: ReadReg1, and set properties
+  set ReadReg1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlslice:1.0 ReadReg1 ]
+  set_property -dict [list \
+    CONFIG.DIN_FROM {7} \
+    CONFIG.DIN_TO {4} \
+    CONFIG.DIN_WIDTH {16} \
+  ] $ReadReg1
+
+
+  # Create instance: SignExtensionSlice, and set properties
+  set SignExtensionSlice [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlslice:1.0 SignExtensionSlice ]
+  set_property -dict [list \
+    CONFIG.DIN_FROM {3} \
+    CONFIG.DIN_WIDTH {16} \
+  ] $SignExtensionSlice
+
+
+  # Create instance: ALUCon, and set properties
+  set ALUCon [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlslice:1.0 ALUCon ]
+  set_property -dict [list \
+    CONFIG.DIN_FROM {3} \
+    CONFIG.DIN_WIDTH {12} \
+  ] $ALUCon
+
+
+  # Create instance: FunctionBits, and set properties
+  set FunctionBits [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlslice:1.0 FunctionBits ]
+  set_property -dict [list \
+    CONFIG.DIN_FROM {3} \
+    CONFIG.DIN_WIDTH {16} \
+  ] $FunctionBits
+
+
   # Create port connections
   connect_bd_net -net ALUControl_0_ALUControl  [get_bd_pins ALUControl/ALUControl] \
   [get_bd_pins ALU/ALUControl]
   connect_bd_net -net ALU_0_ALUResult  [get_bd_pins ALU/ALUResult] \
   [get_bd_pins MemtoReg/input0] \
   [get_bd_pins DataMemory/address]
-  connect_bd_net -net ALU_0_zero  [get_bd_pins ALU/zero] \
-  [get_bd_pins ANDGate/B]
+  connect_bd_net -net ALU_zero  [get_bd_pins ALU/zero] \
+  [get_bd_pins XORGate_0/B]
   connect_bd_net -net ANDGate_0_C  [get_bd_pins ANDGate/C] \
   [get_bd_pins PCSrc/select]
   connect_bd_net -net ControlUnit_0_ALUOp  [get_bd_pins ControlUnit/ALUOp] \
@@ -433,17 +522,17 @@ proc create_root_design { parentCell } {
   [get_bd_pins RegdstMUX/select]
   connect_bd_net -net ControlUnit_0_RegWrite  [get_bd_pins ControlUnit/RegWrite] \
   [get_bd_pins RegisterFile/reg_write]
+  connect_bd_net -net ControlUnit_BNE  [get_bd_pins ControlUnit/BNE] \
+  [get_bd_pins XORGate_0/A]
   connect_bd_net -net DataMemory_1_read_data  [get_bd_pins DataMemory/read_data] \
   [get_bd_pins MemtoReg/input1]
   connect_bd_net -net InstructMem_0_Instruction  [get_bd_pins InstructMem_0/Instruction] \
-  [get_bd_pins ALUControl/Instruction] \
-  [get_bd_pins RegisterFile/read_reg1] \
-  [get_bd_pins RegisterFile/read_reg2] \
-  [get_bd_pins RegdstMUX/input1] \
   [get_bd_pins Jump/input0] \
-  [get_bd_pins ControlUnit/Instruction] \
-  [get_bd_pins RegdstMUX/input0] \
-  [get_bd_pins SignExtension/imm_value]
+  [get_bd_pins CU/Din] \
+  [get_bd_pins ReadReg2/Din] \
+  [get_bd_pins ReadReg1/Din] \
+  [get_bd_pins SignExtensionSlice/Din] \
+  [get_bd_pins FunctionBits/Din]
   connect_bd_net -net Jump_out  [get_bd_pins Jump/out] \
   [get_bd_pins PC/pc_in]
   connect_bd_net -net Multiplexer_0_out  [get_bd_pins RegdstMUX/out] \
@@ -462,6 +551,9 @@ proc create_root_design { parentCell } {
   [get_bd_pins AddertoPC/pc_in]
   connect_bd_net -net PCSrc_out  [get_bd_pins PCSrc/out] \
   [get_bd_pins Jump/input1]
+  connect_bd_net -net ReadReg1_Dout  [get_bd_pins ReadReg2/Dout] \
+  [get_bd_pins RegisterFile/read_reg2] \
+  [get_bd_pins RegdstMUX/input0]
   connect_bd_net -net RegisterFile_0_read_data1  [get_bd_pins RegisterFile/read_data1] \
   [get_bd_pins ALU/ReadData1]
   connect_bd_net -net RegisterFile_0_read_data2  [get_bd_pins RegisterFile/read_data2] \
@@ -472,6 +564,19 @@ proc create_root_design { parentCell } {
   connect_bd_net -net SignExt_0_result  [get_bd_pins SignExtension/result] \
   [get_bd_pins ALUSrc/input1] \
   [get_bd_pins ShiftLeft2/in]
+  connect_bd_net -net XORGate_0_out  [get_bd_pins XORGate_0/out] \
+  [get_bd_pins ANDGate/B]
+  connect_bd_net -net xlslice_0_Dout  [get_bd_pins CU/Dout] \
+  [get_bd_pins ControlUnit/Instruction]
+  connect_bd_net -net xlslice_0_Dout1  [get_bd_pins ALUCon/Dout] \
+  [get_bd_pins ALUControl/Instruction]
+  connect_bd_net -net xlslice_0_Dout2  [get_bd_pins FunctionBits/Dout] \
+  [get_bd_pins RegdstMUX/input1]
+  connect_bd_net -net xlslice_2_Dout  [get_bd_pins ReadReg1/Dout] \
+  [get_bd_pins RegisterFile/read_reg1]
+  connect_bd_net -net xlslice_3_Dout  [get_bd_pins SignExtensionSlice/Dout] \
+  [get_bd_pins SignExtension/imm_value] \
+  [get_bd_pins ALUCon/Din]
 
   # Create address segments
 
