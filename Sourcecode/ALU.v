@@ -56,6 +56,7 @@ module ALU(
                 default: temp = 0;
              
             endcase
+         assign ALUResult = temp;
         end
     end
 
