@@ -27,6 +27,9 @@ module PCRegister(
     input      [15:0] pc_in,
     output reg [15:0] pc_out
     );
+    initial begin
+        pc_out = 16'h0000;
+    end
     
     always @(posedge clk) begin
         if (reset)

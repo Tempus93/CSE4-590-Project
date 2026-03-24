@@ -46,7 +46,7 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 
 # The design that will be created by this Tcl script contains the following 
 # module references:
-# ALU, ControlUnit, ALUControl, PCRegister, InstructMem, SignExt, RegisterFile, Multiplexer, Multiplexer, DataMemory, Multiplexer, PCAdder, ANDGate, Multiplexer, PCAdder, ShiftLeft2v2, Multiplexer, XORGate
+# ALU, ControlUnit, PCRegister, InstructMem, SignExt, RegisterFile, Multiplexer, DataMemory, Multiplexer, PCAdder, ANDGate, Multiplexer, PCAdder, ShiftLeft2v2, Multiplexer, XORGate, fourbitMux, ALUControl
 
 # Please add the sources of those modules before sourcing this Tcl script.
 
@@ -164,12 +164,10 @@ if { $bCheckModules == 1 } {
    set list_check_mods "\ 
 ALU\
 ControlUnit\
-ALUControl\
 PCRegister\
 InstructMem\
 SignExt\
 RegisterFile\
-Multiplexer\
 Multiplexer\
 DataMemory\
 Multiplexer\
@@ -180,6 +178,8 @@ PCAdder\
 ShiftLeft2v2\
 Multiplexer\
 XORGate\
+fourbitMux\
+ALUControl\
 "
 
    set list_mods_missing ""
@@ -244,6 +244,11 @@ proc create_root_design { parentCell } {
   # Create interface ports
 
   # Create ports
+  set clk [ create_bd_port -dir I -type clk -freq_hz 100000000 clk ]
+  set reset [ create_bd_port -dir I -type rst reset ]
+  set_property -dict [ list \
+   CONFIG.POLARITY {ACTIVE_HIGH} \
+ ] $reset
 
   # Create instance: ALU, and set properties
   set block_name ALU
@@ -267,17 +272,6 @@ proc create_root_design { parentCell } {
      return 1
    }
   
-  # Create instance: ALUControl, and set properties
-  set block_name ALUControl
-  set block_cell_name ALUControl
-  if { [catch {set ALUControl [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
-     return 1
-   } elseif { $ALUControl eq "" } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
-     return 1
-   }
-  
   # Create instance: PC, and set properties
   set block_name PCRegister
   set block_cell_name PC
@@ -289,13 +283,13 @@ proc create_root_design { parentCell } {
      return 1
    }
   
-  # Create instance: InstructMem_0, and set properties
+  # Create instance: InstructMemory, and set properties
   set block_name InstructMem
-  set block_cell_name InstructMem_0
-  if { [catch {set InstructMem_0 [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
+  set block_cell_name InstructMemory
+  if { [catch {set InstructMemory [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
      catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
      return 1
-   } elseif { $InstructMem_0 eq "" } {
+   } elseif { $InstructMemory eq "" } {
      catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
      return 1
    }
@@ -318,17 +312,6 @@ proc create_root_design { parentCell } {
      catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
      return 1
    } elseif { $RegisterFile eq "" } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
-     return 1
-   }
-  
-  # Create instance: RegdstMUX, and set properties
-  set block_name Multiplexer
-  set block_cell_name RegdstMUX
-  if { [catch {set RegdstMUX [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
-     return 1
-   } elseif { $RegdstMUX eq "" } {
      catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
      return 1
    }
@@ -478,14 +461,6 @@ proc create_root_design { parentCell } {
   ] $SignExtensionSlice
 
 
-  # Create instance: ALUCon, and set properties
-  set ALUCon [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlslice:1.0 ALUCon ]
-  set_property -dict [list \
-    CONFIG.DIN_FROM {3} \
-    CONFIG.DIN_WIDTH {12} \
-  ] $ALUCon
-
-
   # Create instance: FunctionBits, and set properties
   set FunctionBits [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlslice:1.0 FunctionBits ]
   set_property -dict [list \
@@ -494,18 +469,40 @@ proc create_root_design { parentCell } {
   ] $FunctionBits
 
 
+  # Create instance: RegDst, and set properties
+  set block_name fourbitMux
+  set block_cell_name RegDst
+  if { [catch {set RegDst [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   } elseif { $RegDst eq "" } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   }
+  
+  # Create instance: ALUControl_0, and set properties
+  set block_name ALUControl
+  set block_cell_name ALUControl_0
+  if { [catch {set ALUControl_0 [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   } elseif { $ALUControl_0 eq "" } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   }
+  
   # Create port connections
-  connect_bd_net -net ALUControl_0_ALUControl  [get_bd_pins ALUControl/ALUControl] \
+  connect_bd_net -net ALUControl_0_ALUControl  [get_bd_pins ALUControl_0/ALUControl] \
   [get_bd_pins ALU/ALUControl]
   connect_bd_net -net ALU_0_ALUResult  [get_bd_pins ALU/ALUResult] \
-  [get_bd_pins MemtoReg/input0] \
-  [get_bd_pins DataMemory/address]
+  [get_bd_pins DataMemory/address] \
+  [get_bd_pins MemtoReg/input0]
   connect_bd_net -net ALU_zero  [get_bd_pins ALU/zero] \
   [get_bd_pins XORGate_0/B]
   connect_bd_net -net ANDGate_0_C  [get_bd_pins ANDGate/C] \
   [get_bd_pins PCSrc/select]
   connect_bd_net -net ControlUnit_0_ALUOp  [get_bd_pins ControlUnit/ALUOp] \
-  [get_bd_pins ALUControl/ALUOp]
+  [get_bd_pins ALUControl_0/ALUOp]
   connect_bd_net -net ControlUnit_0_ALUSrc  [get_bd_pins ControlUnit/ALUSrc] \
   [get_bd_pins ALUSrc/select]
   connect_bd_net -net ControlUnit_0_Branch  [get_bd_pins ControlUnit/Branch] \
@@ -519,24 +516,22 @@ proc create_root_design { parentCell } {
   connect_bd_net -net ControlUnit_0_MemtoReg  [get_bd_pins ControlUnit/MemtoReg] \
   [get_bd_pins MemtoReg/select]
   connect_bd_net -net ControlUnit_0_RegDst  [get_bd_pins ControlUnit/RegDst] \
-  [get_bd_pins RegdstMUX/select]
+  [get_bd_pins RegDst/select]
   connect_bd_net -net ControlUnit_0_RegWrite  [get_bd_pins ControlUnit/RegWrite] \
   [get_bd_pins RegisterFile/reg_write]
   connect_bd_net -net ControlUnit_BNE  [get_bd_pins ControlUnit/BNE] \
   [get_bd_pins XORGate_0/A]
   connect_bd_net -net DataMemory_1_read_data  [get_bd_pins DataMemory/read_data] \
   [get_bd_pins MemtoReg/input1]
-  connect_bd_net -net InstructMem_0_Instruction  [get_bd_pins InstructMem_0/Instruction] \
-  [get_bd_pins Jump/input0] \
+  connect_bd_net -net InstructMem_0_Instruction  [get_bd_pins InstructMemory/Instruction] \
   [get_bd_pins CU/Din] \
   [get_bd_pins ReadReg2/Din] \
   [get_bd_pins ReadReg1/Din] \
   [get_bd_pins SignExtensionSlice/Din] \
-  [get_bd_pins FunctionBits/Din]
+  [get_bd_pins FunctionBits/Din] \
+  [get_bd_pins Jump/input0]
   connect_bd_net -net Jump_out  [get_bd_pins Jump/out] \
   [get_bd_pins PC/pc_in]
-  connect_bd_net -net Multiplexer_0_out  [get_bd_pins RegdstMUX/out] \
-  [get_bd_pins RegisterFile/write_reg]
   connect_bd_net -net Multiplexer_1_out  [get_bd_pins ALUSrc/out] \
   [get_bd_pins ALU/ReadData2]
   connect_bd_net -net Multiplexer_2_out  [get_bd_pins MemtoReg/out] \
@@ -547,36 +542,42 @@ proc create_root_design { parentCell } {
   connect_bd_net -net PCAdder_1_pc_branch  [get_bd_pins ADD2/pc_branch] \
   [get_bd_pins PCSrc/input1]
   connect_bd_net -net PCRegister_0_pc_out  [get_bd_pins PC/pc_out] \
-  [get_bd_pins InstructMem_0/Address] \
-  [get_bd_pins AddertoPC/pc_in]
+  [get_bd_pins AddertoPC/pc_in] \
+  [get_bd_pins InstructMemory/Address]
   connect_bd_net -net PCSrc_out  [get_bd_pins PCSrc/out] \
   [get_bd_pins Jump/input1]
   connect_bd_net -net ReadReg1_Dout  [get_bd_pins ReadReg2/Dout] \
-  [get_bd_pins RegisterFile/read_reg2] \
-  [get_bd_pins RegdstMUX/input0]
+  [get_bd_pins RegDst/input0] \
+  [get_bd_pins RegisterFile/read_reg2]
   connect_bd_net -net RegisterFile_0_read_data1  [get_bd_pins RegisterFile/read_data1] \
   [get_bd_pins ALU/ReadData1]
   connect_bd_net -net RegisterFile_0_read_data2  [get_bd_pins RegisterFile/read_data2] \
-  [get_bd_pins ALUSrc/input0] \
-  [get_bd_pins DataMemory/write_data]
+  [get_bd_pins DataMemory/write_data] \
+  [get_bd_pins ALUSrc/input0]
   connect_bd_net -net ShiftLeft2v2_0_out  [get_bd_pins ShiftLeft2/out] \
   [get_bd_pins ADD2/imm_shifted]
   connect_bd_net -net SignExt_0_result  [get_bd_pins SignExtension/result] \
-  [get_bd_pins ALUSrc/input1] \
-  [get_bd_pins ShiftLeft2/in]
+  [get_bd_pins ShiftLeft2/in] \
+  [get_bd_pins ALUSrc/input1]
   connect_bd_net -net XORGate_0_out  [get_bd_pins XORGate_0/out] \
   [get_bd_pins ANDGate/B]
+  connect_bd_net -net clk_1  [get_bd_ports clk] \
+  [get_bd_pins DataMemory/clk] \
+  [get_bd_pins PC/clk] \
+  [get_bd_pins RegisterFile/clk]
+  connect_bd_net -net fourbitMux_0_out  [get_bd_pins RegDst/out] \
+  [get_bd_pins RegisterFile/write_reg]
+  connect_bd_net -net reset_1  [get_bd_ports reset] \
+  [get_bd_pins PC/reset]
   connect_bd_net -net xlslice_0_Dout  [get_bd_pins CU/Dout] \
   [get_bd_pins ControlUnit/Instruction]
-  connect_bd_net -net xlslice_0_Dout1  [get_bd_pins ALUCon/Dout] \
-  [get_bd_pins ALUControl/Instruction]
   connect_bd_net -net xlslice_0_Dout2  [get_bd_pins FunctionBits/Dout] \
-  [get_bd_pins RegdstMUX/input1]
+  [get_bd_pins RegDst/input1] \
+  [get_bd_pins ALUControl_0/Instruction]
   connect_bd_net -net xlslice_2_Dout  [get_bd_pins ReadReg1/Dout] \
   [get_bd_pins RegisterFile/read_reg1]
   connect_bd_net -net xlslice_3_Dout  [get_bd_pins SignExtensionSlice/Dout] \
-  [get_bd_pins SignExtension/imm_value] \
-  [get_bd_pins ALUCon/Din]
+  [get_bd_pins SignExtension/imm_value]
 
   # Create address segments
 
@@ -584,6 +585,7 @@ proc create_root_design { parentCell } {
   # Restore current instance
   current_bd_instance $oldCurInst
 
+  validate_bd_design
   save_bd_design
 }
 # End of create_root_design()
@@ -595,6 +597,4 @@ proc create_root_design { parentCell } {
 
 create_root_design ""
 
-
-common::send_gid_msg -ssname BD::TCL -id 2053 -severity "WARNING" "This Tcl script was generated from a block design that has not been validated. It is possible that design <$design_name> may result in errors during validation."
 

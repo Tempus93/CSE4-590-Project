@@ -12,6 +12,18 @@ module DataMemory(
     output reg [15:0] read_data
 );
     reg [7:0] memory [0:63];
+    integer i;
+
+    // --- Added Initialization ---
+    initial begin
+        for (i = 0; i < 64; i = i + 1) begin
+            memory[i] = 8'h00;
+        end
+        // Optional: Seed a value to test "Load Word" (LW)
+        // This puts 0xABCD at Address 0 and 1
+        memory[0] = 8'hAB; 
+        memory[1] = 8'hCD;
+    end
 
     always @(*) begin
         if (mem_read)
