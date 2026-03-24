@@ -46,7 +46,7 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 
 # The design that will be created by this Tcl script contains the following 
 # module references:
-# ALU, ControlUnit, PCRegister, InstructMem, SignExt, RegisterFile, Multiplexer, DataMemory, Multiplexer, PCAdder, ANDGate, Multiplexer, PCAdder, ShiftLeft2v2, Multiplexer, XORGate, fourbitMux, ALUControl
+# ALU, ControlUnit, PCRegister, InstructMem, SignExt, RegisterFile, Multiplexer, DataMemory, Multiplexer, PCAdder, ANDGate, Multiplexer, PCAdder, ShiftLeft2v2, Multiplexer, XORGate, fourbitMux, ALUControl, ShiftLeft1, SignExt11Jump, PCAdder
 
 # Please add the sources of those modules before sourcing this Tcl script.
 
@@ -180,6 +180,9 @@ Multiplexer\
 XORGate\
 fourbitMux\
 ALUControl\
+ShiftLeft1\
+SignExt11Jump\
+PCAdder\
 "
 
    set list_mods_missing ""
@@ -491,12 +494,53 @@ proc create_root_design { parentCell } {
      return 1
    }
   
+  # Create instance: ShiftLeft1_0, and set properties
+  set block_name ShiftLeft1
+  set block_cell_name ShiftLeft1_0
+  if { [catch {set ShiftLeft1_0 [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   } elseif { $ShiftLeft1_0 eq "" } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   }
+  
+  # Create instance: JumpSlice, and set properties
+  set JumpSlice [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlslice:1.0 JumpSlice ]
+  set_property -dict [list \
+    CONFIG.DIN_FROM {11} \
+    CONFIG.DIN_WIDTH {16} \
+  ] $JumpSlice
+
+
+  # Create instance: SignExt11Jump_0, and set properties
+  set block_name SignExt11Jump
+  set block_cell_name SignExt11Jump_0
+  if { [catch {set SignExt11Jump_0 [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   } elseif { $SignExt11Jump_0 eq "" } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   }
+  
+  # Create instance: JumpAdder, and set properties
+  set block_name PCAdder
+  set block_cell_name JumpAdder
+  if { [catch {set JumpAdder [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   } elseif { $JumpAdder eq "" } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   }
+  
   # Create port connections
   connect_bd_net -net ALUControl_0_ALUControl  [get_bd_pins ALUControl_0/ALUControl] \
   [get_bd_pins ALU/ALUControl]
   connect_bd_net -net ALU_0_ALUResult  [get_bd_pins ALU/ALUResult] \
-  [get_bd_pins DataMemory/address] \
-  [get_bd_pins MemtoReg/input0]
+  [get_bd_pins MemtoReg/input0] \
+  [get_bd_pins DataMemory/address]
   connect_bd_net -net ALU_zero  [get_bd_pins ALU/zero] \
   [get_bd_pins XORGate_0/B]
   connect_bd_net -net ANDGate_0_C  [get_bd_pins ANDGate/C] \
@@ -529,7 +573,11 @@ proc create_root_design { parentCell } {
   [get_bd_pins ReadReg1/Din] \
   [get_bd_pins SignExtensionSlice/Din] \
   [get_bd_pins FunctionBits/Din] \
-  [get_bd_pins Jump/input0]
+  [get_bd_pins JumpSlice/Din]
+  connect_bd_net -net JumpAdder_pc_branch  [get_bd_pins JumpAdder/pc_branch] \
+  [get_bd_pins Jump/input1]
+  connect_bd_net -net JumpSlice_Dout  [get_bd_pins JumpSlice/Dout] \
+  [get_bd_pins SignExt11Jump_0/imm_value]
   connect_bd_net -net Jump_out  [get_bd_pins Jump/out] \
   [get_bd_pins PC/pc_in]
   connect_bd_net -net Multiplexer_1_out  [get_bd_pins ALUSrc/out] \
@@ -543,19 +591,24 @@ proc create_root_design { parentCell } {
   [get_bd_pins PCSrc/input1]
   connect_bd_net -net PCRegister_0_pc_out  [get_bd_pins PC/pc_out] \
   [get_bd_pins AddertoPC/pc_in] \
-  [get_bd_pins InstructMemory/Address]
+  [get_bd_pins InstructMemory/Address] \
+  [get_bd_pins JumpAdder/pc_in]
   connect_bd_net -net PCSrc_out  [get_bd_pins PCSrc/out] \
-  [get_bd_pins Jump/input1]
+  [get_bd_pins Jump/input0]
   connect_bd_net -net ReadReg1_Dout  [get_bd_pins ReadReg2/Dout] \
   [get_bd_pins RegDst/input0] \
   [get_bd_pins RegisterFile/read_reg2]
   connect_bd_net -net RegisterFile_0_read_data1  [get_bd_pins RegisterFile/read_data1] \
   [get_bd_pins ALU/ReadData1]
   connect_bd_net -net RegisterFile_0_read_data2  [get_bd_pins RegisterFile/read_data2] \
-  [get_bd_pins DataMemory/write_data] \
-  [get_bd_pins ALUSrc/input0]
+  [get_bd_pins ALUSrc/input0] \
+  [get_bd_pins DataMemory/write_data]
+  connect_bd_net -net ShiftLeft1_0_out  [get_bd_pins ShiftLeft1_0/out] \
+  [get_bd_pins JumpAdder/imm_shifted]
   connect_bd_net -net ShiftLeft2v2_0_out  [get_bd_pins ShiftLeft2/out] \
   [get_bd_pins ADD2/imm_shifted]
+  connect_bd_net -net SignExt11Jump_0_result  [get_bd_pins SignExt11Jump_0/result] \
+  [get_bd_pins ShiftLeft1_0/in]
   connect_bd_net -net SignExt_0_result  [get_bd_pins SignExtension/result] \
   [get_bd_pins ShiftLeft2/in] \
   [get_bd_pins ALUSrc/input1]
@@ -585,7 +638,6 @@ proc create_root_design { parentCell } {
   # Restore current instance
   current_bd_instance $oldCurInst
 
-  validate_bd_design
   save_bd_design
 }
 # End of create_root_design()
@@ -597,4 +649,6 @@ proc create_root_design { parentCell } {
 
 create_root_design ""
 
+
+common::send_gid_msg -ssname BD::TCL -id 2053 -severity "WARNING" "This Tcl script was generated from a block design that has not been validated. It is possible that design <$design_name> may result in errors during validation."
 

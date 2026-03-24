@@ -3,9 +3,9 @@
 // Company: 
 // Engineer: Justin Downer
 // 
-// Create Date: 03/23/2026 06:31:19 PM
+// Create Date: 03/18/2026 12:28:11 AM
 // Design Name: 
-// Module Name: 4bitMux
+// Module Name: ShiftLeft1
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,13 +20,10 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module fourbitMux(
-    input [3:0] input0,
-    input [3:0] input1,
-    input select,
-    output [3:0] out
-);
-
-assign out = select ? input1 : input0;
+module ShiftLeft1(
+    input [15:0] in,
+    output [15:0] out
+    );
     
+    assign out = in << 1;
 endmodule
