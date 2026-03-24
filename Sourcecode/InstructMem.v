@@ -21,10 +21,12 @@
 
 module InstructMem (
     input [15:0] Address,
-    output reg [15:0] Instruction
+    output [15:0] Instruction
 );
 reg [7:0] memory [0:63];
-
+initial begin
+    $readmemh("vbit.mem", memory);
+end
 assign Instruction = {memory[Address], memory[Address+1]};
-    
+  
 endmodule
