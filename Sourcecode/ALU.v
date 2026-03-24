@@ -29,7 +29,6 @@ module ALU(
     output reg [15:0] ALUResult
 
     );
-    reg [15:0] temp;
 
     parameter
     //Required Instructions
@@ -45,18 +44,23 @@ module ALU(
 
     always@(*) begin //Unit Initalization
         zero = 0;
-        temp = 0;
         ALUResult = 0;
         begin
             case (ALUControl)
-                3'b000: temp = ReadData1 + ReadData2; // ADD (used by LW, SW, ADDI, ADD)
-                3'b001: temp = ReadData1 - ReadData2; // SUB (used by BEQ, BNE, SUB)
-                3'b010: temp = ReadData1 << ReadData2[3:0]; // SLL
-                3'b011: temp = ReadData1 & ReadData2; // AND
-                default: temp = 0;
+                3'b000: ALUResult = ReadData1 + ReadData2; // ADD (used by LW, SW, ADDI, ADD)
+                3'b001: ALUResult = ReadData1 - ReadData2; // SUB (used by BEQ, BNE, SUB)
+                3'b010: ALUResult = ReadData1 << ReadData2[3:0]; // SLL
+                3'b011: ALUResult = ReadData1 & ReadData2; // AND
+                default: ALUResult = 0;
              
             endcase
-         assign ALUResult = temp;
+         // --- The Conditional Check ---
+        if (ALUResult == 16'h0000) begin
+            zero = 1;
+        end else begin
+            zero = 0;
+        end
+         
         end
     end
 
