@@ -73,3 +73,21 @@ The design must include the following mandatory blocks:
 * **Xilinx Vivado**: Integrated development environment for HDL synthesis and simulation.
 * **Basys 3 FPGA**: Target hardware platform.
 * **Verilog HDL**: Hardware Description Language used for structure and behavior.
+
+---
+
+## Work Contribution Summary
+*This section provides a transparent record of individual contributions as evidenced by the GitHub commit history and project logs*
+
+### Justin Downer (Lead Architect & Systems Integrator)
+* **Core Architecture**: Designed and implemented the behavioral Verilog for the ALU, Control Unit, and Register File.
+* **Code Refactoring**: Audited and refactored all externally submitted logic modules to resolve synthesis errors and ensure compatibility with the 16-bit datapath.
+* **Structural Integration**: Developed the top-level structural design using Vivado Block Designer and managed the automated HDL wrapper for the full system.
+* **Control Logic**: Engineered the PC-increment logic (+2), XOR/AND branch selection mechanism, and J-type jump address calculation.
+* **Verification**: Successfully generated the bitstream, mapped the ALUResult to the 7-segment display, and conducted all functional hardware testing.
+
+### Sajjad Ali
+* **Initial Module Drafts**: Provided early drafts for supplementary logic modules (Refactored by Lead Architect for functional integration).
+
+### Vishal Kishore Kumar
+* **Initial Module Drafts**: Provided early drafts for supplementary logic modules (Refactored by Lead Architect for functional integration).
