@@ -252,6 +252,7 @@ proc create_root_design { parentCell } {
   set_property -dict [ list \
    CONFIG.POLARITY {ACTIVE_HIGH} \
  ] $reset
+  set ALURes [ create_bd_port -dir O -from 15 -to 0 -type data ALURes ]
 
   # Create instance: ALU, and set properties
   set block_name ALU
@@ -540,7 +541,8 @@ proc create_root_design { parentCell } {
   [get_bd_pins ALU/ALUControl]
   connect_bd_net -net ALU_0_ALUResult  [get_bd_pins ALU/ALUResult] \
   [get_bd_pins MemtoReg/input0] \
-  [get_bd_pins DataMemory/address]
+  [get_bd_pins DataMemory/address] \
+  [get_bd_ports ALURes]
   connect_bd_net -net ALU_zero  [get_bd_pins ALU/zero] \
   [get_bd_pins XORGate_0/B]
   connect_bd_net -net ANDGate_0_C  [get_bd_pins ANDGate/C] \
@@ -638,6 +640,7 @@ proc create_root_design { parentCell } {
   # Restore current instance
   current_bd_instance $oldCurInst
 
+  validate_bd_design
   save_bd_design
 }
 # End of create_root_design()
@@ -649,6 +652,4 @@ proc create_root_design { parentCell } {
 
 create_root_design ""
 
-
-common::send_gid_msg -ssname BD::TCL -id 2053 -severity "WARNING" "This Tcl script was generated from a block design that has not been validated. It is possible that design <$design_name> may result in errors during validation."
 
