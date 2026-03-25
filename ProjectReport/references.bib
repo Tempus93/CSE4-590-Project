@@ -1,0 +1,26 @@
+@book{patterson2020,
+  author    = {Patterson, David A. and Hennessy, John L.},
+  title     = {Computer Organization and Design: The Hardware/Software Interface},
+  edition   = {5},
+  publisher = {Morgan Kaufmann},
+  year      = {2020}
+}
+
+@manual{digilent2026,
+  author = {{Digilent}},
+  title  = {Basys 3 {FPGA} Board Reference Manual},
+  year   = {2026},
+  url    = {https://digilent.com/reference/programmable-logic/basys-3/reference-manual}
+}
+
+@manual{xilinx2026,
+  author = {{Xilinx}},
+  title  = {Vivado Design Suite User Guide},
+  year   = {2026},
+  url    = {https://docs.xilinx.com/r/en-US/ug892-vivado-design-flows-overview}
+}
+```
+
+Compile with:
+```
+pdflatex main.tex && biber main && pdflatex main.tex && pdflatex main.tex

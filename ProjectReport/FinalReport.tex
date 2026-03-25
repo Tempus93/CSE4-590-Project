@@ -1,0 +1,139 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage{amsmath}
+\usepackage[colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue]{hyperref}
+\usepackage[style=ieee, backend=biber]{biblatex}
+\addbibresource{references.bib}
+
+\geometry{letterpaper, margin=1in}
+
+\title{CSE 490/590: Project 1 \\[0.5em]
+       \large Design and Implementation of a 16-bit Single-Cycle Processor}
+\author{Justin Downer}
+\date{April 4, 2026}
+
+\begin{document}
+\maketitle
+
+% ---------------------------------------------------------------
+\section{Synopsis}
+% ---------------------------------------------------------------
+
+This report documents the design, simulation, and hardware synthesis of a 16-bit,
+single-cycle, non-pipelined processor \cite{patterson2020}. The architecture is
+byte-addressed with a 16-bit word size and supports 10 mandatory instructions across
+R-type, I-type, and J-type formats \cite{patterson2020}. The processor was developed
+using Verilog HDL and verified using both Vivado simulations and the Xilinx Basys~3
+FPGA board \cite{digilent2026, xilinx2026}.
+
+% ---------------------------------------------------------------
+\section{Work Distribution}
+% ---------------------------------------------------------------
+
+While specific modules were contributed by team members, the vast majority of the
+architectural design, system integration, and hardware verification was performed
+individually.
+
+\begin{table}[h]
+  \centering
+  \caption{Division of tasks among group members.}
+  \label{tab:work-distribution}
+  \begin{tabular}{@{}l l p{7.8cm}@{}}
+    \toprule
+    \textbf{Member} & \textbf{Role} & \textbf{Contribution Details} \\
+    \midrule
+    Justin Downer & Lead Architect
+      & Authored behavioral Verilog for the ALU, Control Unit, and Register
+        File \cite{patterson2020}. \\[4pt]
+    Justin Downer & System Integration
+      & Developed the structural top-level wrapper using Vivado Block Designer
+        and managed all IP interconnections \cite{xilinx2026}. \\[4pt]
+    Justin Downer & Hardware Lead
+      & Managed XDC mapping, bitstream generation, and 7-segment display
+        integration for hardware demo \cite{digilent2026}. \\[4pt]
+    Team Members  & Contributors
+      & Developed supplementary logic modules. \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% ---------------------------------------------------------------
+\section{Implementation Details}
+% ---------------------------------------------------------------
+
+\subsection{Design Methodology}
+
+The processor integration utilized \textbf{Vivado's Block Designer} to visualize the
+datapath and component interconnections. A structural Verilog file was maintained via
+the \textbf{Integrated HDL Wrapper} feature, ensuring that any changes to the block
+design were automatically reflected in the top-level code \cite{xilinx2026}. This
+reduced manual wiring errors while allowing individual components to be designed using
+\textbf{behavioral Verilog} \cite{patterson2020}.
+
+\subsection{Instruction Fetching and Memory Alignment}
+
+To maintain byte-addressing, the \textbf{Program Counter (PC)} increments by~2 for
+each sequential instruction \cite{patterson2020}. An \textbf{Adder} module computes
+the next PC value before it is passed to Instruction Memory. The Instruction Memory is
+initialized via the \texttt{readmemh} command, loading \texttt{vbit.mem} and slicing
+the 16-bit output into appropriate bit-fields for the Control Unit, Register File, and
+Sign Extension \cite{patterson2020}.
+
+\subsection{Branch and Jump Control Logic}
+
+The branching mechanism uses a specialized \textbf{XOR-based logic path} to handle
+both \texttt{BEQ} and \texttt{BNE} instructions \cite{patterson2020}. The \textbf{Zero
+Flag} from the ALU is XORed with the \texttt{BNE} signal from the Control Unit; the
+result is ANDed with the Branch Flag to drive the \texttt{PCSrc} multiplexer. A custom
+\textbf{ShiftLeft1} module doubles the effective range of signed immediates while
+keeping the PC word-aligned \cite{patterson2020}.
+
+\subsection{Sign Extension and ALU Control}
+
+Two distinct \textbf{Sign Extension} modules handle the 4-bit signed immediate
+(I-type) and the 12-bit signed immediate (J-type) \cite{patterson2020}. A dedicated
+\textbf{ALU Control} module decodes function bits for R-type instructions
+(e.g.,~\texttt{ADD}, \texttt{SUB}, \texttt{SLL}, \texttt{AND}), improving modularity
+and simplifying the primary Control Unit \cite{patterson2020}.
+
+% ---------------------------------------------------------------
+\section{Hardware Verification}
+% ---------------------------------------------------------------
+
+\subsection{Memory Initialization and Test Strategy}
+
+Data Memory was initialized using a Verilog \texttt{initial} block to hardcode test
+values for immediate verification of \texttt{LW} and \texttt{SW} instructions
+\cite{patterson2020}. Success is defined as the architectural state matching expected
+values across all 10 mandatory instructions \cite{patterson2020}.
+
+\subsection{Hardware Visualization}
+
+To bridge the gap between internal logic and physical observation, the 16-bit
+\textbf{ALUResult} is mapped to the Basys~3 board's \textbf{7-segment display},
+providing a hexadecimal representation of calculations during the live demonstration
+\cite{digilent2026}.
+
+\subsection{Synthesis and Implementation}
+
+The design passed through the Vivado \textbf{Synthesis} and \textbf{Implementation}
+flows without timing violations \cite{xilinx2026}. The absence of critical errors
+confirms that the logic is physically routable on the Artix-7 FPGA \cite{xilinx2026}.
+
+% ---------------------------------------------------------------
+\section{Conclusion}
+% ---------------------------------------------------------------
+
+The successful implementation of this 16-bit processor demonstrates a complete design
+cycle — from ISA specification to FPGA synthesis. The modular approach ensured stable
+execution in both simulation and hardware environments \cite{patterson2020, xilinx2026}.
+
+\printbibliography
+
+\end{document}
