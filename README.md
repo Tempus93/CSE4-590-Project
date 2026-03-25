@@ -77,17 +77,17 @@ The design must include the following mandatory blocks:
 ---
 
 ## Work Contribution Summary
-[cite_start]*This section provides a transparent record of individual contributions as evidenced by the GitHub commit history and project logs [cite: 43-47, 50].*
+*This section provides a transparent record of individual contributions as evidenced by the GitHub commit history and project logs*
 
 ### Justin Downer (Lead Architect & Systems Integrator)
-* [cite_start]**Full-Stack Architecture**: Designed and implemented the core behavioral Verilog for the ALU, Control Unit, and Register File [cite: 58, 83-92].
-* [cite_start]**Code Refactoring & Debugging**: Audited and refactored all externally submitted logic modules to ensure compatibility with the 16-bit datapath and timing requirements[cite: 12, 31, 32].
-* [cite_start]**Structural Integration**: Developed the top-level structural design using Vivado Block Designer and managed the automated HDL wrapper[cite: 59].
-* [cite_start]**Control Flow & Logic**: Engineered the PC-increment logic (+2), XOR/AND branch selection, and J-type jump address calculation [cite: 130-143, 215-218].
-* [cite_start]**Hardware Verification**: Successfully generated the bitstream, mapped the 16-bit ALUResult to the 7-segment display, and conducted all functional hardware testing on the Basys 3[cite: 15, 33, 61, 75].
+* **Core Architecture**: Designed and implemented the behavioral Verilog for the ALU, Control Unit, and Register File.
+* **Code Refactoring**: Audited and refactored all externally submitted logic modules to resolve synthesis errors and ensure compatibility with the 16-bit datapath.
+* **Structural Integration**: Developed the top-level structural design using Vivado Block Designer and managed the automated HDL wrapper for the full system.
+* **Control Logic**: Engineered the PC-increment logic (+2), XOR/AND branch selection mechanism, and J-type jump address calculation.
+* **Verification**: Successfully generated the bitstream, mapped the ALUResult to the 7-segment display, and conducted all functional hardware testing.
 
 ### Sajjad Ali
-* **Module Support**: Provided initial drafts for supplementary logic modules (Refactored by Lead Architect for final integration).
+* **Initial Module Drafts**: Provided early drafts for supplementary logic modules (Refactored by Lead Architect for functional integration).
 
 ### Vishal Kishore Kumar
-* **Module Support**: Provided initial drafts for supplementary logic modules (Refactored by Lead Architect for final integration).
+* **Initial Module Drafts**: Provided early drafts for supplementary logic modules (Refactored by Lead Architect for functional integration).
