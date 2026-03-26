@@ -24,21 +24,19 @@
 % ---------------------------------------------------------------
 \section{Synopsis}
 % ---------------------------------------------------------------
-
 This report documents the design, simulation, and hardware synthesis of a 16-bit,
-single-cycle, non-pipelined processor \cite{patterson2020}. The architecture is
+single-cycle, non-pipelined processor \cite{patterson2020}[cite: 1]. The architecture is
 byte-addressed with a 16-bit word size and supports 10 mandatory instructions across
-R-type, I-type, and J-type formats \cite{patterson2020}. The processor was developed
+R-type, I-type, and J-type formats \cite{patterson2020}[cite: 2]. The processor was developed
 using Verilog HDL and verified using both Vivado simulations and the Xilinx Basys~3
-FPGA board \cite{digilent2026, xilinx2026}.
+FPGA board \cite{digilent2026, xilinx2026}[cite: 3].
 
 % ---------------------------------------------------------------
 \section{Work Distribution}
 % ---------------------------------------------------------------
-
 While specific modules were contributed by team members, the vast majority of the
 architectural design, system integration, and hardware verification was performed
-individually.
+individually[cite: 4].
 
 \begin{table}[h]
   \centering
@@ -50,15 +48,15 @@ individually.
     \midrule
     Justin Downer & Lead Architect
       & Authored behavioral Verilog for the ALU, Control Unit, and Register
-        File \cite{patterson2020}. \\[4pt]
+        File \cite{patterson2020}[cite: 5, 6]. \\[4pt]
     Justin Downer & System Integration
       & Developed the structural top-level wrapper using Vivado Block Designer
-        and managed all IP interconnections \cite{xilinx2026}. \\[4pt]
+        and managed all IP interconnections \cite{xilinx2026}[cite: 7]. \\[4pt]
     Justin Downer & Hardware Lead
       & Managed XDC mapping, bitstream generation, and 7-segment display
-        integration for hardware demo \cite{digilent2026}. \\[4pt]
+        integration for hardware demo \cite{digilent2026}[cite: 8]. \\[4pt]
     Team Members  & Contributors
-      & Developed supplementary logic modules. \\
+      & Developed supplementary logic modules[cite: 9]. \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -66,74 +64,139 @@ individually.
 % ---------------------------------------------------------------
 \section{Implementation Details}
 % ---------------------------------------------------------------
-
 \subsection{Design Methodology}
-
 The processor integration utilized \textbf{Vivado's Block Designer} to visualize the
-datapath and component interconnections. A structural Verilog file was maintained via
+datapath and component interconnections[cite: 10]. A structural Verilog file was maintained via
 the \textbf{Integrated HDL Wrapper} feature, ensuring that any changes to the block
-design were automatically reflected in the top-level code \cite{xilinx2026}. This
+design were automatically reflected in the top-level code \cite{xilinx2026}[cite: 11]. This
 reduced manual wiring errors while allowing individual components to be designed using
-\textbf{behavioral Verilog} \cite{patterson2020}.
+\textbf{behavioral Verilog} \cite{patterson2020}[cite: 12].
 
 \subsection{Instruction Fetching and Memory Alignment}
-
 To maintain byte-addressing, the \textbf{Program Counter (PC)} increments by~2 for
-each sequential instruction \cite{patterson2020}. An \textbf{Adder} module computes
-the next PC value before it is passed to Instruction Memory. The Instruction Memory is
+each sequential instruction \cite{patterson2020}[cite: 13]. An \textbf{Adder} module computes
+the next PC value before it is passed to Instruction Memory[cite: 14]. The Instruction Memory is
 initialized via the \texttt{readmemh} command, loading \texttt{vbit.mem} and slicing
 the 16-bit output into appropriate bit-fields for the Control Unit, Register File, and
-Sign Extension \cite{patterson2020}.
+Sign Extension \cite{patterson2020}[cite: 15].
 
 \subsection{Branch and Jump Control Logic}
-
 The branching mechanism uses a specialized \textbf{XOR-based logic path} to handle
-both \texttt{BEQ} and \texttt{BNE} instructions \cite{patterson2020}. The \textbf{Zero
-Flag} from the ALU is XORed with the \texttt{BNE} signal from the Control Unit; the
-result is ANDed with the Branch Flag to drive the \texttt{PCSrc} multiplexer. A custom
+both \texttt{BEQ} and \texttt{BNE} instructions \cite{patterson2020}[cite: 16]. The \textbf{Zero
+Flag} from the ALU is XORed with the \texttt{BNE} signal from the Control Unit[cite: 17];
+the result is ANDed with the Branch Flag to drive the \texttt{PCSrc} multiplexer[cite: 18]. A custom
 \textbf{ShiftLeft1} module doubles the effective range of signed immediates while
-keeping the PC word-aligned \cite{patterson2020}.
+keeping the PC word-aligned \cite{patterson2020}[cite: 19].
 
 \subsection{Sign Extension and ALU Control}
-
 Two distinct \textbf{Sign Extension} modules handle the 4-bit signed immediate
-(I-type) and the 12-bit signed immediate (J-type) \cite{patterson2020}. A dedicated
+(I-type) and the 12-bit signed immediate (J-type) \cite{patterson2020}[cite: 20]. A dedicated
 \textbf{ALU Control} module decodes function bits for R-type instructions
 (e.g.,~\texttt{ADD}, \texttt{SUB}, \texttt{SLL}, \texttt{AND}), improving modularity
-and simplifying the primary Control Unit \cite{patterson2020}.
+and simplifying the primary Control Unit \cite{patterson2020}[cite: 21].
 
+% ---------------------------------------------------------------
+\section{Simulation Results}
+% ---------------------------------------------------------------
+The following waveforms demonstrate the functional correctness of the 10 mandatory instructions within the Vivado simulation environment[cite: 22, 23].
+\subsection{CPU Block Diagram}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.95\textwidth]{CPU_diagram.pdf}
+    \caption{Top-level structural block diagram generated from Vivado IP Integrator.}
+    \label{fig:block_diagram}
+\end{figure}
+
+\clearpage
+\subsection{Instruction Waveforms}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.85\textwidth]{ADD_Waveform.png}
+    \caption{Waveform for R-type \texttt{ADD} instruction.}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.85\textwidth]{SUB_Waveform.png}
+    \caption{Waveform for R-type \texttt{SUB} instruction.}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.85\textwidth]{SLL_Waveform.png}
+    \caption{Waveform for R-type \texttt{SLL} instruction demonstrating shift-left logic.}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.85\textwidth]{AND_Waveform.png}
+    \caption{Waveform for R-type \texttt{AND} instruction.}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.85\textwidth]{LW_Waveform.png}
+    \caption{Waveform for I-type \texttt{LW} instruction showing memory-to-register data transfer.}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.85\textwidth]{SW_Waveform.png}
+    \caption{Waveform for I-type \texttt{SW} instruction showing register-to-memory data transfer.}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.85\textwidth]{ADDI_Waveform.png}
+    \caption{Waveform for I-type \texttt{ADDI} instruction using the 4-bit sign-extended immediate.}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.85\textwidth]{BEQ_Waveform.png}
+    \caption{Waveform for I-type \texttt{BEQ} instruction verifying PC-relative branching.}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.85\textwidth]{BNE_Waveform.png}
+    \caption{Waveform for I-type \texttt{BNE} instruction verifying the XOR-based branch logic.}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.85\textwidth]{JMP_Waveform.png}
+    \caption{Waveform for J-type \texttt{JMP} instruction demonstrating PC-relative jump addressing.}
+\end{figure}
+
+\clearpage
 % ---------------------------------------------------------------
 \section{Hardware Verification}
 % ---------------------------------------------------------------
-
 \subsection{Memory Initialization and Test Strategy}
-
 Data Memory was initialized using a Verilog \texttt{initial} block to hardcode test
 values for immediate verification of \texttt{LW} and \texttt{SW} instructions
-\cite{patterson2020}. Success is defined as the architectural state matching expected
-values across all 10 mandatory instructions \cite{patterson2020}.
+\cite{patterson2020}[cite: 22]. Success is defined as the architectural state matching expected
+values across all 10 mandatory instructions \cite{patterson2020}[cite: 23].
 
 \subsection{Hardware Visualization}
-
 To bridge the gap between internal logic and physical observation, the 16-bit
 \textbf{ALUResult} is mapped to the Basys~3 board's \textbf{7-segment display},
 providing a hexadecimal representation of calculations during the live demonstration
-\cite{digilent2026}.
+\cite{digilent2026}[cite: 24].
 
 \subsection{Synthesis and Implementation}
-
 The design passed through the Vivado \textbf{Synthesis} and \textbf{Implementation}
-flows without timing violations \cite{xilinx2026}. The absence of critical errors
-confirms that the logic is physically routable on the Artix-7 FPGA \cite{xilinx2026}.
+flows without timing violations \cite{xilinx2026}[cite: 25]. The absence of critical errors
+confirms that the logic is physically routable on the Artix-7 FPGA \cite{xilinx2026}[cite: 26].
 
 % ---------------------------------------------------------------
 \section{Conclusion}
 % ---------------------------------------------------------------
-
 The successful implementation of this 16-bit processor demonstrates a complete design
-cycle — from ISA specification to FPGA synthesis. The modular approach ensured stable
-execution in both simulation and hardware environments \cite{patterson2020, xilinx2026}.
+cycle — from ISA specification to FPGA synthesis[cite: 27]. The modular approach ensured stable
+execution in both simulation and hardware environments \cite{patterson2020, xilinx2026}[cite: 27].
 
 \printbibliography
-
 \end{document}
