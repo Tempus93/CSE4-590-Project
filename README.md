@@ -88,6 +88,8 @@ The design must include the following mandatory blocks:
 
 ### Sajjad Ali
 * **Initial Module Drafts**: Provided early drafts for supplementary logic modules (Refactored by Lead Architect for functional integration).
+* **Core Architecture**: Designed and implemented the behavioral Verilog for the Sign Extender and PC Adder.
 
 ### Vishal Kishore Kumar
 * **Initial Module Drafts**: Provided early drafts for supplementary logic modules (Refactored by Lead Architect for functional integration).
+* **Core Architecture**: Designed and implemented the behavioral Verilog for the Data Memory and Multiplexer.
