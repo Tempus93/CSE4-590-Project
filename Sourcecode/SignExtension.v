@@ -25,7 +25,6 @@ module SignExt(
     output [15:0] result
     );
     
-    assign result[3:0] = imm_value;
-    assign result[15:4] = {12{imm_value[3]}};
+    assign result = {{12{imm_value[3]}}, imm_value};
     
 endmodule

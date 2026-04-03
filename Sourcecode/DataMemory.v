@@ -25,11 +25,14 @@ module DataMemory(
         memory[1] = 8'hCD;
     end
 
-    always @(*) begin
+    
+    always @(posedge clk) begin
         if (mem_read)
-            read_data = {memory[address], memory[address+1]};
+            read_data <= {memory[address], memory[address+1]};
+        else
+            read_data <= 16'h0000; // Default value prevents latches
     end
-
+    
     always @(posedge clk) begin
         if (mem_write) begin
             memory[address]   <= write_data[15:8];

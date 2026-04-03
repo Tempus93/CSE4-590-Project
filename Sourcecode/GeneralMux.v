@@ -5,8 +5,8 @@
 module Multiplexer(
     input [15:0] input0,
     input [15:0] input1,
-    input select,
+    input sel,
     output [15:0] out
 );
-    assign out = select ? input1 : input0;
+    assign out = sel ? input1 : input0;
 endmodule
