@@ -21,9 +21,9 @@
 
 
 module ShiftLeft2v2(
-    input [15:0] in,
-    output [15:0] out
+    input [15:0] s_in,
+    output [15:0] result
     );
     
-    assign out = in << 2;
+    assign result = s_in << 2;
 endmodule

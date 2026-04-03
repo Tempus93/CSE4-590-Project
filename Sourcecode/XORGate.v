@@ -23,8 +23,8 @@
 module XORGate(
     input A,
     input B,
-    output out
+    output result
     );
     
-    assign out = A ^ B;
+    assign result = A ^ B;
 endmodule

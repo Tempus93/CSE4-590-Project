@@ -23,10 +23,10 @@
 module fourbitMux(
     input [3:0] input0,
     input [3:0] input1,
-    input select,
-    output [3:0] out
+    input sel,
+    output [3:0] result
 );
 
-assign out = select ? input1 : input0;
+assign result = sel ? input1 : input0;
     
 endmodule

@@ -21,9 +21,9 @@
 
 
 module ShiftLeft1(
-    input [15:0] in,
-    output [15:0] out
+    input [15:0] s_in,
+    output [15:0] result
     );
     
-    assign out = in << 1;
+    assign result = s_in << 1;
 endmodule
