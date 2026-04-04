@@ -18,8 +18,7 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-
-
+(* DONT_TOUCH = "yes" *)
 module ALU(
     //In/Outs of ALU for 16 bit Bus DataRead/ALUResult
     input [15:0] ReadData1,

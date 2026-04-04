@@ -18,7 +18,7 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-
+(* DONT_TOUCH = "yes" *)
 module ControlUnit (
     input [3:0] Instruction,
     output reg RegDst,
