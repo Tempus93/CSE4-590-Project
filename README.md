@@ -87,9 +87,7 @@ The design must include the following mandatory blocks:
 * **Verification**: Successfully generated the bitstream, mapped the ALUResult to the 7-segment display, and conducted all functional hardware testing.
 
 ### Sajjad Ali
-* **Initial Module Drafts**: Provided early drafts for supplementary logic modules (Refactored by Lead Architect for functional integration).
 * **Core Architecture**: Designed and implemented the behavioral Verilog for the Sign Extender and PC Adder.
 
 ### Vishal Kishore Kumar
-* **Initial Module Drafts**: Provided early drafts for supplementary logic modules (Refactored by Lead Architect for functional integration).
 * **Core Architecture**: Designed and implemented the behavioral Verilog for the Data Memory and Multiplexer.
