@@ -84,7 +84,7 @@ The design must include the following mandatory blocks:
 * **Code Refactoring**: Audited and refactored all externally submitted logic modules to resolve synthesis errors and ensure compatibility with the 16-bit datapath.
 * **Structural Integration**: Developed the top-level structural design using Vivado Block Designer and managed the automated HDL wrapper for the full system.
 * **Control Logic**: Engineered the PC-increment logic (+2), XOR/AND branch selection mechanism, and J-type jump address calculation.
-* **Verification**: Successfully generated the bitstream, mapped the ALUResult to the 7-segment display, and conducted all functional hardware testing.
+* **Verification**: Successfully generated the bitstream, mapped the ALUResult to the 16 LED display, and conducted all functional hardware testing.
 
 ### Sajjad Ali
 * **Core Architecture**: Designed and implemented the behavioral Verilog for the Sign Extender and PC Adder.
